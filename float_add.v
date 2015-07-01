@@ -8,7 +8,7 @@ ______________  \/  \/ | \/ | ______________
 --Chinese Description:
 	
 --English Description:
-	latency 3 clock
+	latency 6 clock
 --Version:VERA.1.0.0
 --Data modified:
 --author:Young-ÎâÃ÷
@@ -104,38 +104,60 @@ always@(posedge clock)begin
 		arigen_exp	<= comb_exp + 5'd16;
 end end
 
-reg [3:0]	normal_base_shift;
+reg [10:0]	normalize_encode;
 always@(posedge clock)begin
-	normal_base_shift[3]  <= |arigen_base[10:8];
-	normal_base_shift[2]  <= |arigen_base[7:4]; 
-	normal_base_shift[1]  <= |arigen_base[3:2] || arigen_base[4+3:4+2] || arigen_base[10]; 
-	normal_base_shift[0]  <= |arigen_base[1] | arigen_base[3] | arigen_base[5] | arigen_base[7] |
-							  arigen_base[9];
+	normalize_encode[10]	<= arigen_base[10];
+	normalize_encode[9]		<= arigen_base[ 9] && !(|arigen_base[10:10]);
+	normalize_encode[8]		<= arigen_base[ 8] && !(|arigen_base[10: 9]);
+	normalize_encode[7]		<= arigen_base[ 7] && !(|arigen_base[10: 8]);
+	normalize_encode[6]		<= arigen_base[ 6] && !(|arigen_base[10: 7]);
+	normalize_encode[5]		<= arigen_base[ 5] && !(|arigen_base[10: 6]);
+	normalize_encode[4]		<= arigen_base[ 4] && !(|arigen_base[10: 5]);
+	normalize_encode[3]		<= arigen_base[ 3] && !(|arigen_base[10: 4]);
+	normalize_encode[2]		<= arigen_base[ 2] && !(|arigen_base[10: 3]);
+	normalize_encode[1]		<= arigen_base[ 1] && !(|arigen_base[10: 2]);
+	normalize_encode[0]		<= arigen_base[ 0] && !(|arigen_base[10: 1]);
+end
+
+reg [4:0]	normal_base_shift;
+always@(posedge clock)begin
+	normal_base_shift[3]  <= |normalize_encode[10:8];
+	normal_base_shift[2]  <= |normalize_encode[7:4]; 
+	normal_base_shift[1]  <= |normalize_encode[3:2] || normalize_encode[4+3:4+2] || normalize_encode[10]; 
+	normal_base_shift[0]  <= |normalize_encode[1] | normalize_encode[3] | normalize_encode[5] | normalize_encode[7] |
+							  normalize_encode[9];
+	normal_base_shift[4]  <= ~(|normalize_encode);
 end	 
 
 reg [10:0]	normal_base_prp;
 reg [4:0]	normal_exp_prp;
 
-always@(posedge clock)begin
-	normal_base_prp		<= arigen_base;
-	normal_exp_prp		<= arigen_exp;
+always@(posedge clock)begin:LAT_BLOCK
+reg [10:0]	normal_base_prp_Q;
+reg [4:0]	normal_exp_prp_Q;
+	normal_base_prp_Q		<= arigen_base;
+	normal_exp_prp_Q		<= arigen_exp;
+	normal_base_prp			<= normal_base_prp_Q;	
+	normal_exp_prp			<= normal_exp_prp_Q	;    
 end
 	
 reg [9:0]	final_base;
 reg	[4:0]	final_exp;
 always@(posedge clock)begin   
-	case(normal_base_shift)
-	4'd0:begin		final_base	<= normal_base_prp << 9;  final_exp <= normal_exp_prp - 9; end
-	4'd1:begin		final_base	<= normal_base_prp << 8;  final_exp <= normal_exp_prp - 8; end
-	4'd2:begin		final_base	<= normal_base_prp << 7;  final_exp <= normal_exp_prp - 7; end
-	4'd3:begin		final_base	<= normal_base_prp << 6;  final_exp <= normal_exp_prp - 6; end
-	4'd4:begin		final_base	<= normal_base_prp << 5;  final_exp <= normal_exp_prp - 5; end
-	4'd5:begin		final_base	<= normal_base_prp << 4;  final_exp <= normal_exp_prp - 4; end
-	4'd6:begin		final_base	<= normal_base_prp << 3;  final_exp <= normal_exp_prp - 3; end
-	4'd7:begin		final_base	<= normal_base_prp << 2;  final_exp <= normal_exp_prp - 2; end
-	4'd8:begin		final_base	<= normal_base_prp << 1;  final_exp <= normal_exp_prp - 1; end
-	4'd9:begin		final_base	<= normal_base_prp << 0;  final_exp <= normal_exp_prp - 0; end
-	4'd10:begin		final_base	<= normal_base_prp >> 1;  final_exp <= normal_exp_prp + 1; end
+	casex(normal_base_shift)
+	5'd0:begin		final_base	<= normal_base_prp << 9;  final_exp <= normal_exp_prp - 9; end
+	5'd1:begin		final_base	<= normal_base_prp << 8;  final_exp <= normal_exp_prp - 8; end
+	5'd2:begin		final_base	<= normal_base_prp << 7;  final_exp <= normal_exp_prp - 7; end
+	5'd3:begin		final_base	<= normal_base_prp << 6;  final_exp <= normal_exp_prp - 6; end
+	5'd4:begin		final_base	<= normal_base_prp << 5;  final_exp <= normal_exp_prp - 5; end
+	5'd5:begin		final_base	<= normal_base_prp << 4;  final_exp <= normal_exp_prp - 4; end
+	5'd6:begin		final_base	<= normal_base_prp << 3;  final_exp <= normal_exp_prp - 3; end
+	5'd7:begin		final_base	<= normal_base_prp << 2;  final_exp <= normal_exp_prp - 2; end
+	5'd8:begin		final_base	<= normal_base_prp << 1;  final_exp <= normal_exp_prp - 1; end
+	5'd9:begin		final_base	<= normal_base_prp << 0;  final_exp <= normal_exp_prp - 0; end
+	5'd10,5'd11,5'd12,5'd13,5'd14,5'd15:
+		begin		final_base	<= normal_base_prp >> 1;  final_exp <= normal_exp_prp + 1; end
+	5'd16:begin		final_base	<= 10'd0;				  final_exp	<= 5'd16; end  //ZERO
 	default:;
 	endcase
 end
@@ -148,7 +170,7 @@ cross_clk_sync #(
 )latency_sign(                              
 	clock,                              
 	1'b1,                            
-	(asign^bsign),           
+	(asign~^bsign),           
 	arigen_sign
 );      
 

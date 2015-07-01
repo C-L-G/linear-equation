@@ -41,7 +41,7 @@ always@(posedge clock) begin
 //	float_a	= random_float();
 //	float_b	= random_float();
 
-	float_a	= {1'b0,5'd16,10'd512};
+	float_a	= {1'b1,5'd16,10'd766};
 	float_b	= {1'b1,5'd17,10'd512};
 end
 
@@ -62,7 +62,7 @@ function real float_to_real (logic[15:0] fdata);
 	else 
 		exp		= real'(1)/2**(-E);
 //	float_to_real	<= fdata[9:0]*(2**fdata[14:0])/(2**9)*(1*fdata[15] - 1*(~fdata[15]));
-	float_to_real	= (base/512)*exp*(1*fdata[15] - 1*(~fdata[15]));
+	float_to_real	= fdata[15]? (base/512)*exp : (base/512)*exp*(-1);
 	$display("====> %b  %d   %b ",fdata[15],E,fdata[9:0]);
 	$display("----> %f ,%f ,%f",base/512,exp,float_to_real);
 endfunction:float_to_real
